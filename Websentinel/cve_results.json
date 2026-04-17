@@ -1,0 +1,97 @@
+{
+    "manual_lookup": {
+        "keyword": "apache",
+        "cves": [
+            {
+                "cve_id": "CVE-1999-0236",
+                "description": "ScriptAlias directory in NCSA and Apache httpd allowed attackers to read CGI programs.",
+                "cvss_score": 7.5,
+                "severity": "HIGH",
+                "published": "1997-01-01",
+                "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-1999-0236",
+                "service": "apache"
+            },
+            {
+                "cve_id": "CVE-1999-0071",
+                "description": "Apache httpd cookie buffer overflow for versions 1.1.1 and earlier.",
+                "cvss_score": 7.5,
+                "severity": "HIGH",
+                "published": "1997-09-01",
+                "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-1999-0071",
+                "service": "apache"
+            },
+            {
+                "cve_id": "CVE-1999-0107",
+                "description": "Buffer overflow in Apache 1.2.5 and earlier allows a remote attacker to cause a denial of service with a large number of GET requests containing a large number of / characters.",
+                "cvss_score": 5.0,
+                "severity": "MEDIUM",
+                "published": "1997-12-30",
+                "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-1999-0107",
+                "service": "apache"
+            },
+            {
+                "cve_id": "CVE-1999-1199",
+                "description": "Apache WWW server 1.3.1 and earlier allows remote attackers to cause a denial of service (resource exhaustion) via a large number of MIME headers with the same name, aka the \"sioux\" vulnerability.",
+                "cvss_score": 10.0,
+                "severity": "CRITICAL",
+                "published": "1998-08-07",
+                "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-1999-1199",
+                "service": "apache"
+            },
+            {
+                "cve_id": "CVE-1999-0448",
+                "description": "IIS 4.0 and Apache log HTTP request methods, regardless of how long they are, allowing a remote attacker to hide the URL they really request.",
+                "cvss_score": 5.0,
+                "severity": "MEDIUM",
+                "published": "1999-01-01",
+                "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-1999-0448",
+                "service": "apache"
+            },
+            {
+                "cve_id": "CVE-1999-0678",
+                "description": "A default configuration of Apache on Debian GNU/Linux sets the ServerRoot to /usr/doc, which allows remote users to read documentation files for the entire server.",
+                "cvss_score": 5.0,
+                "severity": "MEDIUM",
+                "published": "1999-01-17",
+                "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-1999-0678",
+                "service": "apache"
+            },
+            {
+                "cve_id": "CVE-1999-1412",
+                "description": "A possible interaction between Apple MacOS X release 1.0 and Apache HTTP server allows remote attackers to cause a denial of service (crash) via a flood of HTTP GET requests to CGI programs, which generates a large number of processes.",
+                "cvss_score": 5.0,
+                "severity": "MEDIUM",
+                "published": "1999-06-03",
+                "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-1999-1412",
+                "service": "apache"
+            },
+            {
+                "cve_id": "CVE-1999-1237",
+                "description": "Multiple buffer overflows in smbvalid/smbval SMB authentication library, as used in Apache::AuthenSmb and possibly other modules, allows remote attackers to execute arbitrary commands via (1) a long username, (2) a long password, and (3) other unspecified methods.",
+                "cvss_score": 10.0,
+                "severity": "CRITICAL",
+                "published": "1999-06-06",
+                "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-1999-1237",
+                "service": "apache"
+            },
+            {
+                "cve_id": "CVE-2000-1206",
+                "description": "Vulnerability in Apache httpd before 1.3.11, when configured for mass virtual hosting using mod_rewrite, or mod_vhost_alias in Apache 1.3.9, allows remote attackers to retrieve arbitrary files.",
+                "cvss_score": 5.0,
+                "severity": "MEDIUM",
+                "published": "1999-08-20",
+                "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-2000-1206",
+                "service": "apache"
+            },
+            {
+                "cve_id": "CVE-1999-0926",
+                "description": "Apache allows remote attackers to conduct a denial of service via a large number of MIME headers.",
+                "cvss_score": 10.0,
+                "severity": "CRITICAL",
+                "published": "1999-09-03",
+                "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-1999-0926",
+                "service": "apache"
+            }
+        ]
+    }
+}

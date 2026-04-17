@@ -1,0 +1,12 @@
+{
+    "target": "http://testphp.vulnweb.com",
+    "ip": "44.228.249.3",
+    "scan_time": "2026-04-18 02:07:40",
+    "open_ports": [],
+    "summary": {
+        "total_open": 0,
+        "high_risk": 0,
+        "medium_risk": 0,
+        "cves_found": 0
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "target": "http://testphp.vulnweb.com",
+    "scan_time": "2026-04-18 02:16:15",
+    "pages_crawled": 0,
+    "forms_found": 0,
+    "total_findings": 0,
+    "findings": []
+}
