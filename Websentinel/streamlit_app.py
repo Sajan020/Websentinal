@@ -22,10 +22,16 @@ import plotly.graph_objects as go
 from datetime import datetime
 
 # Import all scan modules
-from recon            import run_recon
-from port_scanner     import run_port_scan
-from vuln_scanner     import run_vuln_scan
-from cve_lookup       import run_cve_lookup
+try:
+    from recon import run_recon
+    from port_scanner import run_port_scan
+    from vuln_scanner import run_vuln_scan
+    from cve_lookup import run_cve_lookup
+except ImportError:
+    from Websentinel.recon import run_recon
+    from Websentinel.port_scanner import run_port_scan
+    from Websentinel.vuln_scanner import run_vuln_scan
+    from Websentinel.cve_lookup import run_cve_lookup
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -189,6 +195,12 @@ def load_json(path):
         except Exception:
             continue
     return {}
+
+
+def safe_str(value):
+    if value is None:
+        return ""
+    return str(value)
 
 
 # ─────────────────────────────────────────────
@@ -368,7 +380,7 @@ if page == "📊 Dashboard":
             margin=dict(t=20,b=20,l=20,r=20),
             height=300,
         )
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.plotly_chart(fig_pie, width="stretch")
 
     with col_right:
         st.markdown("#### Findings by Vulnerability Type")
@@ -392,7 +404,7 @@ if page == "📊 Dashboard":
                 margin=dict(t=20,b=20,l=20,r=20),
                 height=300,
             )
-            st.plotly_chart(fig_bar, use_container_width=True)
+            st.plotly_chart(fig_bar, width="stretch")
         else:
             st.info("No findings to chart.")
 
@@ -511,7 +523,7 @@ elif page == "🌐 Ports & Services":
 
     st.dataframe(
         df,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         column_config={
             "Risk": st.column_config.TextColumn("Risk"),
@@ -537,7 +549,7 @@ elif page == "🌐 Ports & Services":
         showlegend=False,
         height=280,
     )
-    st.plotly_chart(fig_risk, use_container_width=True)
+    st.plotly_chart(fig_risk, width="stretch")
 
 
 # ════════════════════════════════════════════
@@ -578,7 +590,7 @@ elif page == "⚠ CVE Findings":
 
         st.dataframe(
             df_cve,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "NVD Link": st.column_config.LinkColumn("NVD Link"),
@@ -605,11 +617,11 @@ elif page == "🔎 Reconnaissance":
     with col1:
         st.markdown("#### 🌍 Target Info")
         st.table(pd.DataFrame([
-            {"Field":"Target URL",  "Value": recon.get("target_url","—")},
-            {"Field":"Domain",      "Value": recon.get("domain","—")},
-            {"Field":"IP Address",  "Value": dns.get("IP","—")},
-            {"Field":"Scan Time",   "Value": recon.get("scan_time","—")},
-            {"Field":"Status Code", "Value": recon.get("http_headers",{}).get("status_code","—")},
+            {"Field":"Target URL",  "Value": safe_str(recon.get("target_url","—"))},
+            {"Field":"Domain",      "Value": safe_str(recon.get("domain","—"))},
+            {"Field":"IP Address",  "Value": safe_str(dns.get("IP","—"))},
+            {"Field":"Scan Time",   "Value": safe_str(recon.get("scan_time","—"))},
+            {"Field":"Status Code", "Value": safe_str(recon.get("http_headers",{}).get("status_code","—"))},
         ]))
 
         st.markdown("#### 🏷 Technologies Detected")
@@ -642,7 +654,9 @@ elif page == "🔎 Reconnaissance":
             df_hdrs = pd.DataFrame(
                 list(hdrs.items()), columns=["Header","Value"]
             )
-            st.dataframe(df_hdrs, use_container_width=True, hide_index=True)
+            if "Value" in df_hdrs.columns:
+                df_hdrs["Value"] = df_hdrs["Value"].astype(str)
+            st.dataframe(df_hdrs, width="stretch", hide_index=True)
         else:
             st.caption("No headers available.")
 
@@ -669,7 +683,7 @@ elif page == "📄 Report":
             data      = pdf_bytes,
             file_name = report_name,
             mime      = "application/pdf",
-            use_container_width=True,
+            width="stretch",
         )
 
         st.divider()

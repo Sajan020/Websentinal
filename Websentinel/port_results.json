@@ -1,10 +1,59 @@
 {
-    "target": "http://testphp.vulnweb.com",
-    "ip": "44.228.249.3",
-    "scan_time": "2026-04-18 02:07:40",
-    "open_ports": [],
+    "target": "http://example.com",
+    "ip": "104.20.23.154",
+    "scan_time": "2026-04-22 19:33:10",
+    "open_ports": [
+        {
+            "port": 80,
+            "protocol": "tcp",
+            "state": "open",
+            "service": "http",
+            "product": "",
+            "version": "",
+            "full_version": "",
+            "risk": "LOW",
+            "risk_reason": "HTTP (unencrypted) \u2014 consider HTTPS",
+            "cve": null
+        },
+        {
+            "port": 443,
+            "protocol": "tcp",
+            "state": "open",
+            "service": "https",
+            "product": "",
+            "version": "",
+            "full_version": "",
+            "risk": "INFO",
+            "risk_reason": "Standard encrypted service",
+            "cve": null
+        },
+        {
+            "port": 8080,
+            "protocol": "tcp",
+            "state": "open",
+            "service": "http-alt",
+            "product": "",
+            "version": "",
+            "full_version": "",
+            "risk": "INFO",
+            "risk_reason": "Open port \u2014 review if needed",
+            "cve": null
+        },
+        {
+            "port": 8443,
+            "protocol": "tcp",
+            "state": "open",
+            "service": "https-alt",
+            "product": "",
+            "version": "",
+            "full_version": "",
+            "risk": "INFO",
+            "risk_reason": "Open port \u2014 review if needed",
+            "cve": null
+        }
+    ],
     "summary": {
-        "total_open": 0,
+        "total_open": 4,
         "high_risk": 0,
         "medium_risk": 0,
         "cves_found": 0
