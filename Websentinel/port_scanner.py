@@ -14,6 +14,7 @@
 import nmap           # pip install python-nmap
 import json
 import socket
+import shutil
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -75,6 +76,11 @@ def run_nmap_scan(ip):
     print("[*] Scanning top 1000 ports with service detection...")
     print("[*] This may take 1–2 minutes...\n")
 
+    if not shutil.which("nmap"):
+        print("  [!] nmap binary not found in system PATH.")
+        print("  [*] Falling back to basic TCP connect scan.")
+        return None, ip
+
     nm = nmap.PortScanner()
 
     # -sV  = version detection
@@ -85,11 +91,60 @@ def run_nmap_scan(ip):
     return nm, ip
 
 
+def run_basic_socket_scan(ip):
+    """Fallback scanner when nmap binary is unavailable."""
+    target_ports = [21,22,23,25,53,80,110,135,139,143,443,445,993,995,1433,1521,3306,3389,5432,5900,6379,8080,8443,8888,27017]
+    findings = []
+    service_map = {
+        21: "ftp", 22: "ssh", 23: "telnet", 25: "smtp", 53: "dns",
+        80: "http", 110: "pop3", 135: "msrpc", 139: "netbios", 143: "imap",
+        443: "https", 445: "smb", 993: "imaps", 995: "pop3s", 1433: "mssql",
+        1521: "oracle", 3306: "mysql", 3389: "rdp", 5432: "postgresql",
+        5900: "vnc", 6379: "redis", 8080: "http-alt", 8443: "https-alt",
+        8888: "http-alt", 27017: "mongodb",
+    }
+
+    print("[*] Running fallback socket scan on curated ports...")
+    for port in target_ports:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(0.5)
+        try:
+            if sock.connect_ex((ip, port)) == 0:
+                service = service_map.get(port, "unknown")
+                product = ""
+                version = ""
+                full_ver = f"{product} {version}".strip()
+                risk = check_risk(port, service, product, version)
+                cve_hit = check_cve(service, product, version)
+                findings.append({
+                    "port": port,
+                    "protocol": "tcp",
+                    "state": "open",
+                    "service": service,
+                    "product": product,
+                    "version": version,
+                    "full_version": full_ver,
+                    "risk": risk["level"],
+                    "risk_reason": risk["reason"],
+                    "cve": cve_hit,
+                })
+                print(f"  [PORT {port:5}/tcp]  OPEN  |  {service:12} {full_ver:25}  |  Risk: {risk['level']:8}")
+        except Exception:
+            pass
+        finally:
+            sock.close()
+
+    return findings
+
+
 # ─────────────────────────────────────────────
 # STEP 3 – Parse Nmap Results
 # ─────────────────────────────────────────────
 def parse_scan_results(nm, ip):
     """Parse nmap output into structured findings."""
+    if nm is None:
+        return run_basic_socket_scan(ip)
+
     port_findings = []
 
     if ip not in nm.all_hosts():
