@@ -19,10 +19,12 @@ import requests
 import json
 import time
 from datetime import datetime
+from pathlib import Path
 
 
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 HEADERS     = {"User-Agent": "WebSentinel/1.0"}
+BASE_DIR    = Path(__file__).resolve().parent
 
 
 # ─────────────────────────────────────────────
@@ -44,16 +46,33 @@ def cvss_to_severity(score):
 # ─────────────────────────────────────────────
 def load_port_results(filepath="port_results.json"):
     """Load Module 2 output to get detected services."""
-    try:
-        with open(filepath, "r") as f:
-            data = json.load(f)
-        ports = data.get("open_ports", [])
-        print(f"[*] Loaded {len(ports)} open port(s) from port_results.json")
-        return ports
-    except FileNotFoundError:
-        print("[-] port_results.json not found.")
-        print("    Run Module 2 (port_scanner.py) first.")
-        return []
+    candidates = []
+    raw_path = Path(filepath)
+
+    if raw_path.is_absolute():
+        candidates.append(raw_path)
+    else:
+        candidates.extend([
+            Path.cwd() / raw_path,
+            BASE_DIR / raw_path,
+            BASE_DIR.parent / raw_path,
+        ])
+
+    for candidate in candidates:
+        try:
+            with open(candidate, "r") as f:
+                data = json.load(f)
+            ports = data.get("open_ports", [])
+            print(f"[*] Loaded {len(ports)} open port(s) from: {candidate}")
+            return ports
+        except FileNotFoundError:
+            continue
+        except Exception as e:
+            print(f"[-] Failed reading {candidate}: {e}")
+
+    print("[-] port_results.json not found.")
+    print("    Run Module 2 (port_scanner.py) first.")
+    return []
 
 
 # ─────────────────────────────────────────────
@@ -296,12 +315,14 @@ def run_cve_lookup():
     ports    = load_port_results()
 
     if not ports:
-        # Fallback — allow manual lookup if no port results
-        print("\n[*] No port results found. Switching to manual lookup mode.")
-        kw = input("Enter software name to look up (e.g. Apache): ").strip()
-        vr = input("Enter version (optional, press Enter to skip): ").strip()
-        cves = manual_cve_lookup(kw, vr)
-        results = {"manual_lookup": {"keyword": kw, "cves": cves}}
+        # Non-interactive fallback for UI contexts like Streamlit.
+        print("\n[*] No port results found. Skipping CVE lookup for this run.")
+        results = {
+            "scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "services_scanned": 0,
+            "cve_findings": [],
+            "note": "No port scan data available. Run Module 2 first.",
+        }
     else:
         services    = extract_services(ports)
         all_results = run_cve_lookup_for_services(services)
