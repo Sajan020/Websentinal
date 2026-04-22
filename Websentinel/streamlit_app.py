@@ -28,9 +28,12 @@ from vuln_scanner     import run_vuln_scan
 from cve_lookup       import run_cve_lookup
 
 
+BASE_DIR = Path(__file__).resolve().parent
+
+
 def generate_report(target):
     # Try normal module imports first
-    for mod_name in ("report_generator", "modules.report_generator"):
+    for mod_name in ("report", "report_generator", "modules.report_generator", "modules.report"):
         try:
             mod = importlib.import_module(mod_name)
             if hasattr(mod, "generate_report"):
@@ -41,14 +44,17 @@ def generate_report(target):
     # Try loading by file path from common locations
     base_dir = Path(__file__).resolve().parent
     candidates = [
+        base_dir / "report.py",
         base_dir / "report_generator.py",
+        base_dir / "modules" / "report.py",
         base_dir / "modules" / "report_generator.py",
+        base_dir.parent / "report.py",
         base_dir.parent / "report_generator.py",
     ]
 
     for module_path in candidates:
         if module_path.exists():
-            spec = importlib.util.spec_from_file_location("report_generator", module_path)
+            spec = importlib.util.spec_from_file_location("report_loader", module_path)
             if spec and spec.loader:
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
@@ -165,11 +171,24 @@ def sev_color(s):
 
 
 def load_json(path):
-    try:
-        with open(path) as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    path_obj = Path(path)
+    candidates = []
+
+    if path_obj.is_absolute():
+        candidates.append(path_obj)
+    else:
+        candidates.extend([
+            Path.cwd() / path_obj,
+            BASE_DIR / path_obj,
+        ])
+
+    for candidate in candidates:
+        try:
+            with open(candidate) as f:
+                return json.load(f)
+        except Exception:
+            continue
+    return {}
 
 
 # ─────────────────────────────────────────────
@@ -202,9 +221,14 @@ def run_full_scan(target, progress_bar, status_text):
     st.session_state.cves        = load_json("cve_results.json")
 
     # Find generated report file
-    for f in os.listdir("."):
-        if f.startswith("WebSentinel_Report") and f.endswith(".pdf"):
-            st.session_state.report_path = f
+    report_candidates = []
+    for root in [Path.cwd(), BASE_DIR]:
+        if root.exists():
+            report_candidates.extend(root.glob("WebSentinel_Report*.pdf"))
+
+    if report_candidates:
+        latest_report = max(report_candidates, key=lambda p: p.stat().st_mtime)
+        st.session_state.report_path = str(latest_report)
 
     progress_bar.progress(100)
     status_text.markdown("**✅  Scan Complete!**")
@@ -634,7 +658,8 @@ elif page == "📄 Report":
     rpath = st.session_state.report_path
 
     if rpath and os.path.exists(rpath):
-        st.success(f"Report ready: **{rpath}**")
+        report_name = os.path.basename(rpath)
+        st.success(f"Report ready: **{report_name}**")
 
         with open(rpath, "rb") as f:
             pdf_bytes = f.read()
@@ -642,7 +667,7 @@ elif page == "📄 Report":
         st.download_button(
             label     = "⬇  Download Full PDF Report",
             data      = pdf_bytes,
-            file_name = rpath,
+            file_name = report_name,
             mime      = "application/pdf",
             use_container_width=True,
         )
